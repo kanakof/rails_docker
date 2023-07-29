@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    #localとdocker container内に同期する
+    volumes: 
+      - ./src/db/mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql_native_password
+  web:
+    #同じdirの中のdockerfileを参照してwebをbuildするよ
+    build: .
+    #railsサーバを起動します
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    #localとdocker container内に同期する
+    volumes:
+      - ./src:/app
+    ports:
+      - "3000:3000"
+    #webサービスはdbサービスに依存しているよ(railsとdb接続が簡単)
+    depends_on:
+      - db
